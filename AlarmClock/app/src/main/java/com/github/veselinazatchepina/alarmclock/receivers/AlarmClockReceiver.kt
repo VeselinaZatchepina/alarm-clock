@@ -76,7 +76,7 @@ class AlarmClockReceiver : BroadcastReceiver() {
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                 .build()
             channel.setSound(
-                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + R.raw.alarm_clock_sound),
+                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + R.raw.alarm_sound),
                 audioAttributes
             )
             notificationManager.createNotificationChannel(channel)
@@ -93,7 +93,7 @@ class AlarmClockReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSound(
-                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + R.raw.alarm_clock_sound)
+                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + R.raw.alarm_sound)
             )
         val notification = builder.build()
         notificationManager.notify(NOTIFICATION_ALARM_CLOCK_ID, notification)
