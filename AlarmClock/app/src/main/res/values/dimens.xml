@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AlarmClocksFragment -->
+    <dimen name="alarm_clocks_fab_margin_bottom">24dp</dimen>
+
+    <dimen name="alarm_clock_active_padding">24dp</dimen>
+    <dimen name="alarm_clock_active_image_size">60dp</dimen>
+    <dimen name="alarm_clock_active_image_margin_end">16dp</dimen>
+    <dimen name="alarm_clock_active_dismiss_btn_margin_end">16dp</dimen>
+
+    <dimen name="alarm_clock_data_padding">24dp</dimen>
+    <dimen name="alarm_clock_data_edit_text_width">60dp</dimen>
+    <dimen name="alarm_clock_data_edit_text_margin_top">16dp</dimen>
+    <dimen name="alarm_clock_data_edit_text_margin_end">16dp</dimen>
+    <dimen name="alarm_clock_data_edit_text_margin_start">16dp</dimen>
+    <dimen name="alarm_clock_data_ok_btn_margin_end">8dp</dimen>
+    <dimen name="alarm_clock_data_ok_btn_margin_top">24dp</dimen>
+    <dimen name="alarm_clock_data_ok_btn_margin_start">8dp</dimen>
+
+    <dimen name="alarm_clocks_text_size">40sp</dimen>
+    <dimen name="alarm_clocks_margin_top">8dp</dimen>
+    <dimen name="alarm_clock_data_error_text_margin_top">8dp</dimen>
+</resources>

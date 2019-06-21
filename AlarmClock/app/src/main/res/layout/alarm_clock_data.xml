@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   android:padding="@dimen/alarm_clock_data_padding">
+
+
+    <EditText
+            android:id="@+id/alarmClockDataHours"
+            android:layout_width="@dimen/alarm_clock_data_edit_text_width"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/alarm_clock_data_edit_text_margin_top"
+            android:layout_marginEnd="@dimen/alarm_clock_data_edit_text_margin_end"
+            android:inputType="number"
+            android:maxLength="2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/verticalGuideline"/>
+
+    <EditText
+            android:id="@+id/alarmClockDataMinuets"
+            android:layout_width="@dimen/alarm_clock_data_edit_text_width"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/alarm_clock_data_edit_text_margin_start"
+            android:layout_marginTop="@dimen/alarm_clock_data_edit_text_margin_top"
+            android:inputType="number"
+            android:maxLength="2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/verticalGuideline"/>
+
+    <TextView
+            android:id="@+id/alarmClockData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alarm_clock_data_error_text"
+            android:textColor="@android:color/holo_red_light"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/alarm_clock_data_error_text_margin_top"
+            app:layout_constraintTop_toBottomOf="@+id/alarmClockDataMinuets"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    <LinearLayout android:id="@+id/alarmClockDays"
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:layout_marginTop="@dimen/alarm_clock_data_error_text_margin_top"
+                  app:layout_constraintTop_toBottomOf="@+id/alarmClockData"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_mo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/mondayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_tu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/tuesdayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_we"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/wednesdayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_th"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/thursdayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_fr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/fridayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_su"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/saturdayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView
+                    android:text="@string/alarm_clock_data_sa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/sundayCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.Guideline android:id="@+id/verticalGuideline"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:orientation="vertical"
+                                                app:layout_constraintGuide_percent="0.5"/>
+    <Button
+            android:id="@+id/alarmClockDataOkBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alarm_clock_data_ok_btn_text"
+            android:layout_marginEnd="@dimen/alarm_clock_data_ok_btn_margin_end"
+            android:layout_marginTop="@dimen/alarm_clock_data_ok_btn_margin_top"
+            android:layout_marginStart="@dimen/alarm_clock_data_ok_btn_margin_start"
+            app:layout_constraintStart_toStartOf="@+id/verticalGuideline"
+            app:layout_constraintEnd_toStartOf="@+id/verticalGuideline"
+            app:layout_constraintTop_toBottomOf="@+id/alarmClockDays"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

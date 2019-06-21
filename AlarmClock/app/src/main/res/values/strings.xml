@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">AlarmClock</string>
+
+    <string name="alarm_clock_data_time">%1s : %2s</string>
+    <string name="alarm_clock_data_remaining_time">Time left: %1s hours</string>
+
+    <string name="alarm_clock_active_dismiss_btn_text">Dismiss</string>
+    <string name="alarm_clock_active_snooze_btn_text">Snooze</string>
+
+    <string name="alarm_clock_data_ok_btn_text">OK</string>
+    <string name="alarm_clock_data_error_text">Data is invalid</string>
+    <string name="alarm_clock_data_mo">Mo</string>
+    <string name="alarm_clock_data_tu">Tu</string>
+    <string name="alarm_clock_data_we">We</string>
+    <string name="alarm_clock_data_th">Th</string>
+    <string name="alarm_clock_data_fr">Fr</string>
+    <string name="alarm_clock_data_su">Su</string>
+    <string name="alarm_clock_data_sa">Sa</string>
+    <string name="alarm_clock_notification_title">Alarm Clock</string>
+    <string name="alarm_clock_notification_dismiss_text">Dismiss</string>
+    <string name="alarm_clock_notification_snooze_text">Snooze</string>
 </resources>
