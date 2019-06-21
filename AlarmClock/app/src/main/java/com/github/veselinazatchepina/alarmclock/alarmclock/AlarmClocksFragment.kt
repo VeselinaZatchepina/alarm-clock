@@ -139,8 +139,8 @@ class AlarmClocksFragment : Fragment() {
                 setAlarmClockDataText(hours, minutes)
                 alarmClockViewModel.saveAlarmClock(AlarmClock(hours = hours, minutes = minutes))
                 createAlarmTask(
-                    5,//getDelayTime(hours, minutes),
-                    TimeUnit.SECONDS, //Миллисек
+                    getDelayTime(hours, minutes),
+                    TimeUnit.MILLISECONDS,
                     getAlarmClockDaysString(dialogView),
                     hours,
                     minutes

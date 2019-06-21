@@ -41,7 +41,7 @@ class AlarmWorker(appContext: Context, workerParams: WorkerParameters) : Worker(
             val notificationManager =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(NOTIFICATION_ALARM_CLOCK_ID)
-            createAlarmTask(5, TimeUnit.SECONDS)
+            createAlarmTask(5, TimeUnit.MINUTES)
         }
 
         return Result.success()

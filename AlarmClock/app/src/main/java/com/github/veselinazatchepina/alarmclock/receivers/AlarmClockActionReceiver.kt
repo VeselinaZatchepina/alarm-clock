@@ -59,7 +59,7 @@ class AlarmClockActionReceiver : BroadcastReceiver() {
             }
 
             AlarmClockAction.SNOOZE.value -> {
-                createAlarmTask(10, TimeUnit.SECONDS)
+                createAlarmTask(5, TimeUnit.MINUTES)
             }
         }
     }
