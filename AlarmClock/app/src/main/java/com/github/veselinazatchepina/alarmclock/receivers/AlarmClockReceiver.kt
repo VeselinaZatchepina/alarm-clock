@@ -4,17 +4,12 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
+import android.content.*
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import java.util.*
-import android.media.AudioAttributes
 import com.github.veselinazatchepina.alarmclock.*
 import com.github.veselinazatchepina.alarmclock.enums.AlarmClockAction
+import com.github.veselinazatchepina.alarmclock.services.AlarmClockSoundService
 
 
 /**
@@ -23,10 +18,8 @@ import com.github.veselinazatchepina.alarmclock.enums.AlarmClockAction
  */
 class AlarmClockReceiver : BroadcastReceiver() {
 
-    private var workRequestId: UUID? = null
     private var alarmClockDays: String? = null
-    private var alarmClockHours: Int? = null
-    private var alarmClockMinutes: Int? = null
+    private var alarmClockTimeInMillis: Long? = null
 
     companion object {
         private const val CHANNEL_ID = "id_com.github.veselinazatchepina.alarmclock"
@@ -44,10 +37,8 @@ class AlarmClockReceiver : BroadcastReceiver() {
     }
 
     private fun defineInputData(intent: Intent?) {
-        workRequestId = intent?.getSerializableExtra(ALARM_CLOCK_WORK_REQUEST_ID) as UUID?
         alarmClockDays = intent?.getStringExtra(ALARM_CLOCK_ALARM_DAYS)
-        alarmClockHours = intent?.getIntExtra(ALARM_CLOCK_ALARM_HOURS, 0)
-        alarmClockMinutes = intent?.getIntExtra(ALARM_CLOCK_ALARM_MINUTES, 0)
+        alarmClockTimeInMillis = intent?.getLongExtra(ALARM_CLOCK_TIME_MILLIS, 0)
     }
 
     private fun configureNotification(context: Context?) {
@@ -71,14 +62,6 @@ class AlarmClockReceiver : BroadcastReceiver() {
                 NotificationManager.IMPORTANCE_HIGH
             )
             channel.description = CHANNEL_DESC
-            val audioAttributes = AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                .build()
-            channel.setSound(
-                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + R.raw.alarm_sound),
-                audioAttributes
-            )
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -86,26 +69,29 @@ class AlarmClockReceiver : BroadcastReceiver() {
             .setSmallIcon(R.drawable.ic_alarm_on_black_24dp)
             .setContentIntent(launchIntent)
             .setDefaults(Notification.DEFAULT_LIGHTS)
-            .setVibrate(LongArray(3).plus(0).plus(500).plus(1000))
+            .setAutoCancel(false)
             .setContentTitle(context.getString(R.string.alarm_clock_notification_title))
             .addAction(R.drawable.ic_alarm_off_black_24dp, context.getString(R.string.alarm_clock_notification_dismiss_text), defineActionPendingIntent(context, NOTIFICATION_REQUEST_CODE_DISMISS, AlarmClockAction.DISMISS))
             .addAction(R.drawable.ic_alarm_on_black_24dp, context.getString(R.string.alarm_clock_notification_snooze_text), defineActionPendingIntent(context, NOTIFICATION_REQUEST_CODE_SNOOZE, AlarmClockAction.SNOOZE))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSound(
-                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + R.raw.alarm_sound)
-            )
         val notification = builder.build()
         notificationManager.notify(NOTIFICATION_ALARM_CLOCK_ID, notification)
+        startAlarmClockSoundService(context)
+    }
+
+    private fun startAlarmClockSoundService(context: Context) {
+        val intent = Intent(context, AlarmClockSoundService::class.java)
+        intent.putExtra(ALARM_CLOCK_ALARM_DAYS, alarmClockDays)
+        intent.putExtra(ALARM_CLOCK_TIME_MILLIS, alarmClockTimeInMillis)
+        context.startService(intent)
     }
 
     private fun defineActionIntent(context: Context?, actionType: AlarmClockAction): Intent {
         val intent = Intent(context, AlarmClockActionReceiver::class.java)
         intent.putExtra(NOTIFICATION_ACTION_TYPE, actionType.value)
-        intent.putExtra(NOTIFICATION_WORK_REQUEST_ID, workRequestId)
         intent.putExtra(NOTIFICATION_ALARM_DAYS, alarmClockDays)
-        intent.putExtra(NOTIFICATION_ALARM_HOURS, alarmClockHours)
-        intent.putExtra(NOTIFICATION_ALARM_MINUTES, alarmClockMinutes)
+        intent.putExtra(NOTIFICATION_ALARM_TIME_MILLIS, alarmClockTimeInMillis)
         return intent
     }
 

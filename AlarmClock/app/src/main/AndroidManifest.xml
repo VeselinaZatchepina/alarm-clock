@@ -25,6 +25,9 @@
 
         <receiver android:name=".receivers.AlarmClockActionReceiver"/>
 
+        <service android:name=".services.AlarmClockSoundService"
+                 android:enabled="true"/>
+
     </application>
 
 </manifest>

@@ -13,7 +13,7 @@ class AlarmClockViewModel : ViewModel() {
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     val liveAlarmClock = MutableLiveData<AlarmClock>()
 
-    fun getAlarmClock() {
+    fun fetchAlarmClock() {
         compositeDisposable.add(AlarmClockUseCaseImpl.getAlarmClock()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

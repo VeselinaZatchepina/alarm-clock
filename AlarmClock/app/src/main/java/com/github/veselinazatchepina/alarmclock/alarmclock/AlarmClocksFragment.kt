@@ -11,15 +11,9 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
-import com.github.veselinazatchepina.alarmclock.R
+import com.github.veselinazatchepina.alarmclock.*
 import com.github.veselinazatchepina.alarmclock.data.AlarmClock
-import com.github.veselinazatchepina.alarmclock.workmanager.AlarmWorker
-import com.github.veselinazatchepina.alarmclock.workmanager.AlarmWorker.Companion.WORK_MANAGER_HOURS
-import com.github.veselinazatchepina.alarmclock.workmanager.AlarmWorker.Companion.WORK_MANAGER_INPUT_DATA_DAYS
-import com.github.veselinazatchepina.alarmclock.workmanager.AlarmWorker.Companion.WORK_MANAGER_MINUTES
+import com.github.veselinazatchepina.alarmclock.receivers.AlarmClockTaskManager
 import kotlinx.android.synthetic.main.alarm_clock_data.view.*
 import kotlinx.android.synthetic.main.fragment_alarm_clocks.*
 import org.json.JSONArray
@@ -34,7 +28,7 @@ import java.util.concurrent.TimeUnit
  *  - введенные данные проверяются на валидность;
  *  - сохраняются данные будильника в локальной БД;
  *  - устанавливается время будильника на экране;
- *  - создается задача на новый будильник [AlarmWorker];
+ *  - создается задача на новый будильник [AlarmClockTaskManager];
  */
 class AlarmClocksFragment : Fragment() {
 
@@ -53,13 +47,12 @@ class AlarmClocksFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater.inflate(R.layout.fragment_alarm_clocks, container, false)
-        alarmClockViewModel.getAlarmClock()
+        alarmClockViewModel.fetchAlarmClock()
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         floatingActionButton.setOnClickListener {
             getAlarmDataDialog().show()
         }
@@ -98,9 +91,10 @@ class AlarmClocksFragment : Fragment() {
     }
 
     private fun setTimeLeftText(alarmClock: AlarmClock) {
+        val a = getTimeLeft(alarmClock.hours, alarmClock.minutes)
         alarmClockRemainingDataToWakeup?.text = String.format(
             getString(R.string.alarm_clock_data_remaining_time),
-            TimeUnit.MILLISECONDS.toHours(getDelayTime(alarmClock.hours, alarmClock.minutes)).toString()
+            TimeUnit.MILLISECONDS.toHours(getTimeLeft(alarmClock.hours, alarmClock.minutes)).toString()
         )
     }
 
@@ -134,17 +128,17 @@ class AlarmClocksFragment : Fragment() {
             val hours = clockDataToInt(hourString)
             val minutes = clockDataToInt(minuteString)
 
-            if (hours < 24 && minutes < 60) {
+            if (hours < HOURS_MAX_VALUE && minutes < MINUTES_MAX_VALUE) {
                 dialogView.alarmClockData.visibility = View.GONE
                 setAlarmClockDataText(hours, minutes)
                 alarmClockViewModel.saveAlarmClock(AlarmClock(hours = hours, minutes = minutes))
-                createAlarmTask(
-                    getDelayTime(hours, minutes),
-                    TimeUnit.MILLISECONDS,
-                    getAlarmClockDaysString(dialogView),
-                    hours,
-                    minutes
-                )
+
+                AlarmClockTaskManager(requireContext())
+                    .createAlarmTask(
+                        getAlarmClockDaysString(dialogView),
+                        clockDataToMillis(hours, minutes)
+                    )
+
                 dialog.dismiss()
             } else {
                 dialogView.alarmClockData.visibility = View.VISIBLE
@@ -153,32 +147,9 @@ class AlarmClocksFragment : Fragment() {
     }
 
     /**
-     * Метод создает новую задачу на отложенный старт будильника.
+     * Метод рассчитывает время оставшееся до будильника.
      */
-    private fun createAlarmTask(
-        duration: Long,
-        timeUnit: TimeUnit,
-        alarmClockDays: String,
-        hours: Int,
-        minutes: Int
-    ) {
-        val alarmWorkRequest = OneTimeWorkRequestBuilder<AlarmWorker>()
-            .setInitialDelay(duration, timeUnit)
-            .setInputData(
-                workDataOf(
-                    WORK_MANAGER_INPUT_DATA_DAYS to alarmClockDays,
-                    WORK_MANAGER_HOURS to hours,
-                    WORK_MANAGER_MINUTES to minutes
-                )
-            )
-            .build()
-        WorkManager.getInstance().enqueue(alarmWorkRequest)
-    }
-
-    /**
-     * Метод рассчитывает время на которое откладывается будильник.
-     */
-    private fun getDelayTime(hours: Int, minutes: Int): Long {
+    private fun getTimeLeft(hours: Int, minutes: Int): Long {
         val currentDate = Calendar.getInstance()
         val dueDate = Calendar.getInstance()
         dueDate.set(Calendar.HOUR_OF_DAY, hours)
@@ -191,7 +162,7 @@ class AlarmClocksFragment : Fragment() {
     }
 
     private fun clockDataToInt(timeValue: String) =
-        if (timeValue.startsWith("0")) {
+        if (timeValue.startsWith("0") && timeValue != "0") {
             timeValue.substring(1, 2).toInt()
         } else {
             timeValue.toInt()
@@ -207,6 +178,9 @@ class AlarmClocksFragment : Fragment() {
             stringBuilder.toString()
         }
 
+    private fun clockDataToMillis(hours: Int, minutes: Int) =
+        TimeUnit.HOURS.toMillis(hours.toLong()) + TimeUnit.MINUTES.toMillis(minutes.toLong())
+
     /**
      * Метод формирует строку для хранения дней повторения будильника.
      * Дни недели для повторения хранятся в виде строки, полученной из jsonArray,
@@ -214,7 +188,7 @@ class AlarmClocksFragment : Fragment() {
      * в зависимости от того, установлен ли будильник на данный день или нет.
      */
     private fun getAlarmClockDaysString(dialogView: View): String {
-        val days = arrayListOf<Boolean>(
+        val days = listOf(
             dialogView.mondayCheckBox.isChecked,
             dialogView.tuesdayCheckBox.isChecked,
             dialogView.wednesdayCheckBox.isChecked,

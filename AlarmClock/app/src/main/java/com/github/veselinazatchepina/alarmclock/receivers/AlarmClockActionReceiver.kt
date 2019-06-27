@@ -4,12 +4,9 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.github.veselinazatchepina.alarmclock.*
 import com.github.veselinazatchepina.alarmclock.enums.AlarmClockAction
-import com.github.veselinazatchepina.alarmclock.workmanager.AlarmWorker
+import com.github.veselinazatchepina.alarmclock.services.AlarmClockSoundService
 import org.json.JSONArray
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -17,32 +14,37 @@ import java.util.concurrent.TimeUnit
 /**
  * В данном ресивере осуществляется обработка нажатий кнопок "Dismiss" и "Snooze" на панели уведомлений.
  * При нажатии на "Dismiss" проверяется наличие повторов по дням.
- * В случае наличия повторов создается задача на запуск будильника.
+ * В случае наличия повторов создается задача на запуск будильника через [AlarmClockTaskManager].
  */
 class AlarmClockActionReceiver : BroadcastReceiver() {
 
-    private var workRequestId: UUID? = null
     private var alarmClockDays: String? = null
-    private var alarmClockHours: Int? = null
-    private var alarmClockMinutes: Int? = null
-    private var action: String? = null
+    private var alarmClockTimeInMillis: Long? = null
+    private var alarmClockAction: String? = null
+    private var currentContext: Context? = null
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        defineInputData(intent)
-        stopCurrentWork(workRequestId, context)
+        defineInputData(intent, context)
+        stopCurrentAlarmClock()
         defineAlarmClockAction()
     }
 
-    private fun defineInputData(intent: Intent?) {
-        workRequestId = intent?.getSerializableExtra(NOTIFICATION_WORK_REQUEST_ID) as UUID?
-        action = intent?.getStringExtra(NOTIFICATION_ACTION_TYPE)
+    private fun defineInputData(intent: Intent?, context: Context?) {
+        currentContext = context
+        alarmClockAction = intent?.getStringExtra(NOTIFICATION_ACTION_TYPE)
         alarmClockDays = intent?.getStringExtra(NOTIFICATION_ALARM_DAYS)
-        alarmClockHours = intent?.getIntExtra(NOTIFICATION_ALARM_HOURS, 0) ?: 0
-        alarmClockMinutes = intent?.getIntExtra(NOTIFICATION_ALARM_MINUTES, 0) ?: 0
+        alarmClockTimeInMillis = intent?.getLongExtra(NOTIFICATION_ALARM_TIME_MILLIS, 0)
+    }
+
+    private fun stopCurrentAlarmClock() {
+        currentContext?.stopService(Intent(currentContext, AlarmClockSoundService::class.java))
+        val notificationManager =
+            currentContext?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ALARM_CLOCK_ID)
     }
 
     private fun defineAlarmClockAction() {
-        when (action) {
+        when (alarmClockAction) {
             AlarmClockAction.DISMISS.value -> {
                 alarmClockDays?.let { days ->
                     if (alarmClockDays != null && days.isNotEmpty()) {
@@ -59,44 +61,16 @@ class AlarmClockActionReceiver : BroadcastReceiver() {
             }
 
             AlarmClockAction.SNOOZE.value -> {
-                createAlarmTask(5, TimeUnit.MINUTES)
+                AlarmClockTaskManager(currentContext).createAlarmTask(
+                    alarmClockDays ?: "",
+                    (alarmClockTimeInMillis ?: 0) + TimeUnit.MINUTES.toMillis(SNOOZE_MINUTES_COUNT.toLong())
+                )
             }
         }
     }
 
-    private fun stopCurrentWork(workRequestId: UUID?, context: Context?) {
-        workRequestId?.let {
-            WorkManager.getInstance().cancelWorkById(it)
-            val notificationManager =
-                context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.cancel(NOTIFICATION_ALARM_CLOCK_ID)
-        }
-    }
-
     /**
-     * Метод создает новую задачу на отложенный старт будильника.
-     */
-    private fun createAlarmTask(duration: Long, timeUnit: TimeUnit) {
-        val alarmWorkRequest = OneTimeWorkRequestBuilder<AlarmWorker>()
-            .setInitialDelay(duration, timeUnit)
-            .build()
-        WorkManager.getInstance().enqueue(alarmWorkRequest)
-    }
-
-    private fun getDelayTime(hours: Int, minutes: Int): Long {
-        val currentDate = Calendar.getInstance()
-        val dueDate = Calendar.getInstance()
-        dueDate.set(Calendar.HOUR_OF_DAY, hours)
-        dueDate.set(Calendar.MINUTE, minutes)
-        dueDate.set(Calendar.SECOND, 0)
-        if (dueDate.before(currentDate)) {
-            dueDate.add(Calendar.HOUR_OF_DAY, 24)
-        }
-        return dueDate.timeInMillis - currentDate.timeInMillis
-    }
-
-    /**
-     * В методе осуществляется расчет времени на котрое откладывается вызов будильника.
+     * В методе осуществляется расчет времени на которое откладывается вызов будильника.
      */
     private fun defineWorkManagerForRepeatAlarmClock(daysList: Array<Boolean>, dayOfWeekPosition: Int) {
         if (!daysList.all { !it }) {
@@ -113,7 +87,11 @@ class AlarmClockActionReceiver : BroadcastReceiver() {
 
                     if (dayForDelay) {
                         isDayForDelayFound = true
-                        createAlarmTask(getDelayTime(alarmClockHours ?: 0, alarmClockMinutes ?: 0) + TimeUnit.HOURS.toMillis(hoursToDelay.toLong()), TimeUnit.MILLISECONDS)
+                        AlarmClockTaskManager(currentContext)
+                            .createAlarmTask(
+                                alarmClockDays ?: "",
+                                alarmClockTimeInMillis ?: 0,
+                                hoursToDelay)
                         break
                     } else {
                         hoursToDelay += 24
